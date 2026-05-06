@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FAF7F2;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#E8D5D3;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#C9A9A6;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="silhouetteGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#9E7E3A;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#C4A35A;stop-opacity:0.3" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#C4A35A;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#D4BB80;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#C4A35A;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="600" fill="url(#bgGrad)" />
+
+  <!-- Decorative circles -->
+  <circle cx="100" cy="100" r="80" fill="#C9A9A6" opacity="0.15"/>
+  <circle cx="700" cy="500" r="120" fill="#7A8C6E" opacity="0.1"/>
+  <circle cx="750" cy="80" r="60" fill="#C4A35A" opacity="0.1"/>
+  <circle cx="50" cy="520" r="90" fill="#C9A9A6" opacity="0.1"/>
+
+  <!-- Floral decorations top -->
+  <g opacity="0.3">
+    <ellipse cx="200" cy="50" rx="30" ry="15" fill="#C9A9A6" transform="rotate(-20, 200, 50)"/>
+    <ellipse cx="230" cy="40" rx="25" ry="12" fill="#C4A35A" transform="rotate(15, 230, 40)"/>
+    <circle cx="215" cy="55" r="8" fill="#A07A77"/>
+    <ellipse cx="580" cy="60" rx="28" ry="13" fill="#7A8C6E" transform="rotate(25, 580, 60)"/>
+    <ellipse cx="610" cy="45" rx="22" ry="10" fill="#C9A9A6" transform="rotate(-15, 610, 45)"/>
+    <circle cx="595" cy="58" r="6" fill="#9E7E3A"/>
+  </g>
+
+  <!-- Couple silhouettes -->
+  <!-- Groom (left) -->
+  <g fill="url(#silhouetteGrad)" opacity="0.7">
+    <!-- Body -->
+    <rect x="290" y="280" width="70" height="180" rx="10"/>
+    <!-- Head -->
+    <circle cx="325" cy="255" r="35"/>
+    <!-- Arm extended toward bride -->
+    <rect x="355" y="320" width="80" height="18" rx="9"/>
+    <!-- Jacket details -->
+    <rect x="300" y="290" width="20" height="100" rx="5" fill="#9E7E3A" opacity="0.5"/>
+  </g>
+
+  <!-- Bride (right) -->
+  <g fill="url(#silhouetteGrad)" opacity="0.7">
+    <!-- Dress (wider at bottom) -->
+    <path d="M410 280 L450 280 L480 460 L380 460 Z" rx="5"/>
+    <!-- Bodice -->
+    <rect x="405" y="265" width="55" height="60" rx="8"/>
+    <!-- Head -->
+    <circle cx="433" cy="248" r="30"/>
+    <!-- Veil -->
+    <path d="M415 220 Q433 190 451 220 Q465 250 460 300 Q433 280 406 300 Q401 250 415 220Z" fill="#E8D5D3" opacity="0.6"/>
+    <!-- Bouquet -->
+    <circle cx="390" cy="360" r="20" fill="#C9A9A6" opacity="0.8"/>
+    <circle cx="376" cy="350" r="12" fill="#A07A77" opacity="0.6"/>
+    <circle cx="404" cy="348" r="12" fill="#C4A35A" opacity="0.6"/>
+  </g>
+
+  <!-- Gold ornament line -->
+  <line x1="150" y1="520" x2="650" y2="520" stroke="url(#goldGrad)" stroke-width="1.5" opacity="0.5"/>
+
+  <!-- Small hearts -->
+  <g fill="#C4A35A" opacity="0.3">
+    <path d="M380 170 C380 163 370 158 370 165 C370 158 360 163 360 170 C360 178 370 185 370 185 C370 185 380 178 380 170Z" transform="scale(1.2) translate(-10, -10)"/>
+    <path d="M480 150 C480 145 473 141 473 146 C473 141 466 145 466 150 C466 156 473 161 473 161 C473 161 480 156 480 150Z"/>
+    <path d="M310 150 C310 145 303 141 303 146 C303 141 296 145 296 150 C296 156 303 161 303 161 C303 161 310 156 310 150Z"/>
+  </g>
+
+  <!-- Bottom floral decoration -->
+  <g opacity="0.25">
+    <ellipse cx="160" cy="560" rx="40" ry="18" fill="#7A8C6E" transform="rotate(-30, 160, 560)"/>
+    <ellipse cx="200" cy="575" rx="35" ry="15" fill="#C9A9A6" transform="rotate(20, 200, 575)"/>
+    <ellipse cx="600" cy="558" rx="38" ry="16" fill="#7A8C6E" transform="rotate(25, 600, 558)"/>
+    <ellipse cx="640" cy="573" rx="32" ry="14" fill="#C9A9A6" transform="rotate(-20, 640, 573)"/>
+  </g>
+</svg>

@@ -1,0 +1,161 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --cream: #F9F7F4;
+    --cream-dark: #F0EDE8;
+    --ink: #1A1A18;
+    --ink-light: #3D3D3A;
+    --warm-gray: #8C8C86;
+    --warm-line: #D8D5CE;
+    --warm-muted: #B0ADA6;
+    --terracotta: #B5705B;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    @apply bg-cream text-ink font-body antialiased;
+    font-size: 16px;
+  }
+
+  h1, h2, h3, h4, h5 {
+    @apply font-heading;
+  }
+
+  ::selection {
+    background: #1A1A18;
+    color: #F9F7F4;
+  }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--cream); }
+  ::-webkit-scrollbar-thumb { background: var(--warm-line); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--warm-gray); }
+}
+
+@layer components {
+
+  /* ─── Tipografia editorial ─── */
+  .page-eyebrow {
+    @apply font-body text-xs tracking-editorial uppercase text-terracotta block;
+  }
+
+  .page-title {
+    @apply font-heading font-light text-ink leading-none;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    letter-spacing: -0.02em;
+  }
+
+  .page-subtitle {
+    @apply font-body text-sm text-warm-gray leading-relaxed;
+  }
+
+  .section-rule {
+    @apply w-full h-px bg-warm-line;
+  }
+
+  /* ─── Cards ─── */
+  .card-editorial {
+    @apply bg-white border border-warm-line/60 overflow-hidden;
+    transition: border-color 0.3s ease;
+  }
+  .card-editorial:hover { border-color: var(--warm-gray); }
+
+  /* alias mantido para compatibilidade */
+  .card-elegant {
+    @apply card-editorial rounded-none;
+  }
+
+  /* ─── Inputs ─── */
+  .input-elegant {
+    @apply w-full border-0 border-b border-warm-line bg-transparent px-0 py-3
+           font-body text-ink text-sm
+           focus:outline-none focus:border-ink
+           placeholder-warm-muted transition-colors duration-300;
+  }
+
+  /* ─── Botões ─── */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 bg-ink text-cream font-body text-xs
+           tracking-editorial uppercase px-8 py-4
+           hover:bg-ink-light transition-colors duration-300
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center gap-2 border border-ink text-ink font-body text-xs
+           tracking-editorial uppercase px-8 py-4
+           hover:bg-ink hover:text-cream transition-colors duration-300;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 text-warm-gray font-body text-xs
+           tracking-editorial uppercase px-4 py-2
+           hover:text-ink transition-colors duration-300;
+  }
+
+  /* ─── Badges (presentes) ─── */
+  .badge-disponivel {
+    @apply text-sage text-xs font-body tracking-wide uppercase border border-sage/30 px-3 py-1;
+  }
+  .badge-reservado {
+    @apply text-terracotta text-xs font-body tracking-wide uppercase border border-terracotta/30 px-3 py-1;
+  }
+  .badge-comprado {
+    @apply text-warm-gray text-xs font-body tracking-wide uppercase border border-warm-line px-3 py-1;
+  }
+
+  /* ─── Gold divider (alias para seções) ─── */
+  .gold-divider {
+    @apply w-12 h-px bg-terracotta mx-auto my-4;
+  }
+  .section-title { @apply page-title text-center; }
+  .section-subtitle { @apply page-eyebrow text-center mb-0; }
+  .glass-card { @apply card-editorial; }
+}
+
+@layer utilities {
+  /* Parallax container */
+  .parallax-container { overflow: hidden; }
+
+  /* Clip reveal */
+  .clip-reveal {
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .clip-reveal.visible {
+    clip-path: inset(0 0% 0 0);
+  }
+
+  /* Text mask */
+  .text-overflow-hidden { overflow: hidden; }
+}
+
+/* ─── Floating hearts (desativados no novo design — mantido por compatibilidade) ─── */
+.heart-particle { display: none; }
+
+/* ─── Animação de linha horizontal ─── */
+@keyframes lineGrow {
+  from { transform: scaleX(0); transform-origin: left; }
+  to   { transform: scaleX(1); transform-origin: left; }
+}
+.line-animate { animation: lineGrow 1s ease-out forwards; }
+
+/* ─── Scroll snap suave para seções full-height ─── */
+.snap-container {
+  scroll-snap-type: y proximity;
+}
+.snap-section {
+  scroll-snap-align: start;
+}
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
