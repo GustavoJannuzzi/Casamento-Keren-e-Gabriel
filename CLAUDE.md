@@ -27,26 +27,28 @@ npx supabase db push  # Aplica migrations no Supabase
 ## Mapa de Páginas
 | Rota | Arquivo | Descrição |
 |---|---|---|
-| `/` | `app/page.tsx` | Home: Hero + Countdown + Corações |
+| `/` | `app/page.tsx` | Home: Hero + Countdown + foto panorâmica |
 | `/nossa-historia` | `app/nossa-historia/page.tsx` | Timeline do casal |
 | `/detalhes` | `app/detalhes/page.tsx` | Cerimônia, recepção, mapa, .ics |
 | `/padrinhos` | `app/padrinhos/page.tsx` | Grid de padrinhos/madrinhas |
-| `/presentes` | `app/presentes/page.tsx` | Lista com MP integration |
+| `/presentes` | `app/presentes/page.tsx` | Lista de presentes com pagamento parcial |
 | `/confirmar-presenca` | `app/confirmar-presenca/page.tsx` | RSVP form |
 | `/recados` | `app/recados/page.tsx` | Livro de recados + Realtime |
-| `/admin` | `app/admin/page.tsx` | Painel admin (senha via env) |
+| `/perfil-noivos` | `app/perfil-noivos/page.tsx` | Painel dos noivos (senha via `NOIVOS_PASSWORD`) |
 
 ## APIs
 | Rota | Método | Descrição |
 |---|---|---|
-| `/api/mp/criar-preferencia` | POST | Cria preferência MP |
-| `/api/mp/webhook` | POST | IPN do Mercado Pago |
-| `/api/presentes/[id]/reservar` | PATCH | Reserva manual |
+| `/api/presentes` | GET | Lista presentes + valor arrecadado |
+| `/api/mp/criar-preferencia` | POST | Cria contribuição (parcial ou total) + preferência MP |
+| `/api/mp/webhook` | POST | IPN do MP — valida HMAC, atualiza contribuição |
 | `/api/confirmacoes` | POST | Novo RSVP |
 | `/api/recados` | POST | Novo recado (pendente) |
-| `/api/admin/auth` | POST/DELETE | Login/logout admin |
-| `/api/admin/recados` | GET/PATCH | Gerenciar recados |
-| `/api/admin/confirmacoes` | GET | Listar RSVPs |
+| `/api/perfil-noivos/auth` | POST/DELETE | Login/logout dos noivos (timing-safe) |
+| `/api/perfil-noivos/recados` | GET/PATCH | Gerenciar recados |
+| `/api/perfil-noivos/confirmacoes` | GET | Listar RSVPs |
+| `/api/perfil-noivos/presentes` | GET | Listar presentes + contribuições (todos os status) |
+| `/api/perfil-noivos/export/[tipo]` | GET | CSV (`tipo`: confirmacoes\|recados\|presentes\|contribuicoes) |
 | `/api/agenda` | GET | Download .ics |
 
 ## Design System
@@ -99,14 +101,27 @@ NEXT_PUBLIC_PIX_KEY  # Chave PIX para lua de mel
 # Privado (somente server)
 SUPABASE_SERVICE_ROLE_KEY  # ⚠️ nunca expor ao cliente
 MERCADOPAGO_ACCESS_TOKEN    # ⚠️ nunca expor ao cliente
-ADMIN_PASSWORD              # ⚠️ nunca expor ao cliente
+MP_WEBHOOK_SECRET           # ⚠️ HMAC do webhook MP (Developers > sua app > Webhooks)
+NOIVOS_PASSWORD             # ⚠️ senha do painel dos noivos
 ```
 
 ## Banco de Dados
-Tabelas: `presentes`, `confirmacoes`, `recados`, `padrinhos`
-RLS habilitado em todas. Realtime ativo em `presentes` e `recados`.
-Migration: `supabase/migrations/001_initial.sql`
+Tabelas: `presentes`, `contribuicoes`, `confirmacoes`, `recados`, `padrinhos`.
+RLS habilitado em todas. Realtime ativo em `presentes`, `contribuicoes` e `recados`.
+
+Migrations:
+- `supabase/migrations/001_initial.sql` — tabelas iniciais
+- `supabase/migrations/002_contribuicoes.sql` — pagamentos parciais
+
 Seed: `supabase/seed.sql`
+
+### Modelo de pagamento parcial
+Cada compra cria um registro em `contribuicoes` (one-to-many com `presentes`):
+- `valor` ≥ R$ 20 (constraint do banco)
+- `status` ∈ `pendente` → `aprovado` (via webhook MP) → ou `cancelado`
+- Webhook MP atualiza `contribuicoes.status='aprovado'` e captura nome real do pagador
+- Quando `SUM(aprovadas) >= presentes.preco`, marca `presentes.status='comprado'`
+- Botão "Presentear inteiro" no UI envia o valor restante (preco − arrecadado)
 
 ## Dados do Casamento (Placeholders — atualizar antes do lançamento)
 - **Igreja**: Igreja Nossa Senhora do Brasil — Curitiba, PR (endereço a confirmar)
@@ -114,28 +129,26 @@ Seed: `supabase/seed.sql`
 - **Chave PIX**: configurar em `NEXT_PUBLIC_PIX_KEY`
 - **MP links**: configurar `MERCADOPAGO_ACCESS_TOKEN` no sandbox primeiro
 
-## ⚠️ Débitos Técnicos (resolver antes do deploy de produção)
+## ⚠️ Pendências para entrega final
 
-### 1. Configurar Supabase e variáveis de ambiente
-**Arquivos afetados**: `lib/supabase/client.ts`, `lib/supabase/server.ts`
-**Comportamento atual**: sem `.env.local`, o site usa dados mockados (fallback estático). Nenhuma operação de banco funciona.
-**O que fazer**: criar projeto Supabase, rodar `supabase/migrations/001_initial.sql` + `seed.sql`, preencher `.env.local`.
+Ver também `docs/QUESTIONARIO-NOIVOS.md` para coleta de conteúdo do casal.
 
-### 2. Configurar Mercado Pago
-**Arquivos afetados**: `lib/mercadopago.ts`, `app/api/mp/`
-**Comportamento atual**: botão "Presentear" tenta criar preferência e falha silenciosamente sem `MERCADOPAGO_ACCESS_TOKEN`.
-**O que fazer**: criar app no [Mercado Pago Developers](https://www.mercadopago.com.br/developers), pegar credenciais sandbox para testes e produção para lançamento. Configurar URL do webhook após deploy no Vercel.
+### Configuração de ambiente (no painel do Vercel)
+- [ ] **Supabase**: criar projeto, rodar `001_initial.sql` + `002_contribuicoes.sql` + `seed.sql`. Configurar `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+- [ ] **Mercado Pago**: criar app em [MP Developers](https://www.mercadopago.com.br/developers); configurar `MERCADOPAGO_ACCESS_TOKEN`, `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY`, `NEXT_PUBLIC_MP_WEBHOOK_URL` (apontando para `/api/mp/webhook`) e gerar `MP_WEBHOOK_SECRET` (HMAC validation)
+- [ ] **Painel noivos**: definir `NOIVOS_PASSWORD`
+- [ ] **PIX**: definir `NEXT_PUBLIC_PIX_KEY` (item lua de mel)
+- [ ] **Conteúdo**: substituir placeholders (nomes, datas, locais, presentes) com dados do questionário preenchido
 
-### 3. Validação de assinatura do webhook MP
-**Arquivo**: `app/api/mp/webhook/route.ts`
-**Comportamento atual**: aceita qualquer POST sem verificar origem.
-**O que fazer**: adicionar validação do header `x-signature` do Mercado Pago antes do lançamento.
+### Débitos técnicos resolvidos nesta entrega
+- [x] HMAC do webhook MP — `app/api/mp/webhook/route.ts` valida `x-signature`
+- [x] timing-safe na senha do painel — `lib/auth.ts` usa `crypto.timingSafeEqual`
+- [x] Pagamentos parciais — tabela `contribuicoes` com fluxo MP completo
+- [x] Painel dos noivos com export CSV — `/perfil-noivos` substitui `/admin`
+- [x] Polimento UI/UX mobile — 10 fixes aplicados (clamp tipográfico, áreas de toque ≥44px, parallax respeitando `prefers-reduced-motion`, contraste terracotta)
+- [x] Foto real do casal — `public/images/noivos-principal.jpeg`, `noivos.jpeg`, `pedido de casamento.jpeg`
 
-### 4. Timing-safe comparison na senha admin
-**Arquivo**: `app/api/admin/auth/route.ts`
-**Comportamento atual**: comparação direta de string (vulnerável a timing attacks).
-**O que fazer**: usar `crypto.timingSafeEqual()` na comparação da senha.
-
-### 5. Foto real do casal
-**Arquivo**: `public/images/hero-placeholder.svg`, `components/home/HeroSection.tsx`
-**O que fazer**: substituir o SVG placeholder pela foto real. Fazer upload para Supabase Storage ou usar URL direta.
+### Pendências futuras (fora desta entrega)
+- [ ] Notificação por e-mail ao casal a cada novo RSVP (Resend / SendGrid)
+- [ ] Domínio próprio `.com.br` (questionário item 10 — depende dos noivos comprarem)
+- [ ] Foto real dos padrinhos quando o casal entregar (hoje usa iniciais como fallback)

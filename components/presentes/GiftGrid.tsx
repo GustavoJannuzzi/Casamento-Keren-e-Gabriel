@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import GiftCard from './GiftCard'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
-import type { Presente } from '@/types'
+import { formatCurrency } from '@/lib/utils'
+import type { PresenteComProgresso } from '@/types'
 
 const CATEGORIAS = [
   { value: '', label: 'Todos' },
@@ -17,42 +18,53 @@ const CATEGORIAS = [
 
 const STATUS_FILTROS = [
   { value: '', label: 'Todos' },
-  { value: 'disponivel', label: 'Disponíveis' },
-  { value: 'reservado', label: 'Reservados' },
-  { value: 'comprado', label: 'Presenteados' },
+  { value: 'em-aberto', label: 'Em aberto' },
+  { value: 'completo', label: 'Completos' },
 ]
 
-export default function GiftGrid({ initialPresentes }: { initialPresentes: Presente[] }) {
-  const [presentes, setPresentes] = useState<Presente[]>(initialPresentes)
+export default function GiftGrid({ initialPresentes }: { initialPresentes: PresenteComProgresso[] }) {
+  const [presentes, setPresentes] = useState<PresenteComProgresso[]>(initialPresentes)
   const [categoria, setCategoria] = useState('')
   const [statusFiltro, setStatusFiltro] = useState('')
 
+  function isCompleto(p: PresenteComProgresso) {
+    return p.status === 'comprado' || (!!p.preco && p.valor_arrecadado >= Number(p.preco))
+  }
+
   const filtered = presentes.filter(p => {
-    const matchCat    = !categoria    || p.categoria === categoria
-    const matchStatus = !statusFiltro || p.status    === statusFiltro
+    const matchCat = !categoria || p.categoria === categoria
+    const completo = isCompleto(p)
+    const matchStatus =
+      !statusFiltro ||
+      (statusFiltro === 'completo' && completo) ||
+      (statusFiltro === 'em-aberto' && !completo)
     return matchCat && matchStatus
   })
 
-  const total = presentes.length
-  const escolhidos = presentes.filter(p => p.status !== 'disponivel').length
-  const progress = total > 0 ? Math.round((escolhidos / total) * 100) : 0
+  // Progresso global por VALOR (não mais por contagem)
+  const totalAlvo = presentes.reduce((acc, p) => acc + (p.preco ? Number(p.preco) : 0), 0)
+  const totalArrecadado = presentes.reduce((acc, p) => acc + p.valor_arrecadado, 0)
+  const progress = totalAlvo > 0 ? Math.min(100, Math.round((totalArrecadado / totalAlvo) * 100)) : 0
 
-  const handleReserved = useCallback((id: string, nome: string, mensagem: string) => {
-    setPresentes(prev =>
-      prev.map(p => p.id === id ? { ...p, status: 'reservado', comprador_nome: nome, comprador_mensagem: mensagem } : p)
-    )
-  }, [])
-
-  // Supabase Realtime (só ativa se configurado)
+  // Realtime: revalida quando há mudança
   useEffect(() => {
     const supabase = getSupabaseBrowserClient()
     if (!supabase) return
 
+    async function reload() {
+      try {
+        const res = await fetch('/api/presentes', { cache: 'no-store' })
+        if (res.ok) {
+          const data: PresenteComProgresso[] = await res.json()
+          if (Array.isArray(data) && data.length > 0) setPresentes(data)
+        }
+      } catch {}
+    }
+
     const channel = supabase
       .channel('presentes-realtime')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'presentes' }, (payload) => {
-        setPresentes(prev => prev.map(p => p.id === payload.new.id ? { ...p, ...payload.new } : p))
-      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'contribuicoes' }, reload)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'presentes' }, reload)
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
@@ -60,16 +72,15 @@ export default function GiftGrid({ initialPresentes }: { initialPresentes: Prese
 
   return (
     <div>
-      {/* Progress bar */}
+      {/* Progresso geral */}
       <div className="border border-warm-line p-6 mb-10 bg-white">
-        <div className="flex justify-between items-baseline mb-3">
+        <div className="flex justify-between items-baseline mb-3 flex-wrap gap-3">
           <p className="font-body text-sm text-warm-gray">
-            <span className="font-heading text-2xl text-ink font-light">{escolhidos}</span>
-            {' '}de{' '}
-            <span className="text-ink">{total}</span>
-            {' '}presentes escolhidos
+            <span className="font-heading text-2xl text-ink font-light tabular-nums">{formatCurrency(totalArrecadado)}</span>
+            <span className="text-warm-gray"> {' '}arrecadados de{' '}</span>
+            <span className="font-heading text-ink tabular-nums">{formatCurrency(totalAlvo)}</span>
           </p>
-          <span className="font-heading text-3xl text-ink font-light">{progress}<span className="text-lg text-warm-gray">%</span></span>
+          <span className="font-heading text-3xl text-ink font-light tabular-nums">{progress}<span className="text-lg text-warm-gray">%</span></span>
         </div>
         <div className="w-full h-px bg-warm-line relative">
           <div
@@ -80,7 +91,7 @@ export default function GiftGrid({ initialPresentes }: { initialPresentes: Prese
       </div>
 
       {/* Filtros */}
-      <div className="flex flex-wrap gap-y-4 justify-between mb-10">
+      <div className="flex flex-wrap gap-y-4 justify-between mb-10 gap-x-4">
         <div className="flex flex-wrap gap-2">
           {CATEGORIAS.map(cat => (
             <FilterChip key={cat.value} label={cat.label} active={categoria === cat.value} onClick={() => setCategoria(cat.value)} />
@@ -101,7 +112,7 @@ export default function GiftGrid({ initialPresentes }: { initialPresentes: Prese
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-warm-line">
           {filtered.map(p => (
-            <GiftCard key={p.id} presente={p} onReserved={handleReserved} />
+            <GiftCard key={p.id} presente={p} />
           ))}
         </div>
       )}

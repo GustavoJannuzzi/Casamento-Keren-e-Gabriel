@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
 import { getSupabaseServiceClient } from '@/lib/supabase/server'
+import { isNoivosAuthorized } from '@/lib/auth'
 
-export async function GET(req: NextRequest) {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('admin-token')?.value
-  if (token !== process.env.ADMIN_PASSWORD) {
+export async function GET() {
+  if (!(await isNoivosAuthorized())) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }
 
   const supabase = getSupabaseServiceClient()
+  if (!supabase) return NextResponse.json([])
+
   const { data, error } = await supabase
     .from('confirmacoes')
     .select('*')

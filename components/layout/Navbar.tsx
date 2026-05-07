@@ -49,7 +49,8 @@ export default function Navbar() {
         <div className="flex justify-center">
           <Link
             href="/"
-            className="font-heading text-xl md:text-2xl text-ink tracking-tight hover:text-ink-light transition-colors"
+            className="font-heading text-ink tracking-tight hover:text-ink-light transition-colors whitespace-nowrap"
+            style={{ fontSize: 'clamp(15px, 4.2vw, 22px)' }}
           >
             Keren <span className="font-light text-terracotta">&</span> Gabriel
           </Link>

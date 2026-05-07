@@ -11,9 +11,11 @@ export default async function RecadosPage() {
   let recados: Recado[] = []
   try {
     const supabase = getSupabaseAnonClient()
-    const { data } = await supabase
-      .from('recados').select('*').eq('aprovado', true).order('created_at', { ascending: false })
-    if (data) recados = data
+    if (supabase) {
+      const { data } = await supabase
+        .from('recados').select('*').eq('aprovado', true).order('created_at', { ascending: false })
+      if (data) recados = data
+    }
   } catch {}
 
   return (

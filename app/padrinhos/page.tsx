@@ -41,8 +41,10 @@ export default async function PadrinhosPage() {
   let padrinhos = PADRINHOS_FALLBACK
   try {
     const supabase = getSupabaseAnonClient()
-    const { data } = await supabase.from('padrinhos').select('*').order('ordem')
-    if (data && data.length > 0) padrinhos = data
+    if (supabase) {
+      const { data } = await supabase.from('padrinhos').select('*').order('ordem')
+      if (data && data.length > 0) padrinhos = data
+    }
   } catch {}
 
   const homens   = padrinhos.filter(p => p.titulo.toLowerCase().includes('padrinho'))
@@ -61,7 +63,7 @@ export default async function PadrinhosPage() {
           <p className="font-body text-xs tracking-editorial uppercase text-warm-gray text-center mb-10">
             Padrinhos
           </p>
-          <div className="grid grid-cols-3 gap-8 md:gap-12">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-8 md:gap-12">
             {homens.map(p => <PadrinhoCard key={p.id} p={p} />)}
           </div>
         </div>
@@ -72,7 +74,7 @@ export default async function PadrinhosPage() {
           <p className="font-body text-xs tracking-editorial uppercase text-warm-gray text-center mb-10">
             Madrinhas
           </p>
-          <div className="grid grid-cols-3 gap-8 md:gap-12">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-8 md:gap-12">
             {mulheres.map(p => <PadrinhoCard key={p.id} p={p} />)}
           </div>
         </div>

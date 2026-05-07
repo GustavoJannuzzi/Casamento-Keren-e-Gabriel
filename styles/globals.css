@@ -40,7 +40,7 @@
 
   /* ─── Tipografia editorial ─── */
   .page-eyebrow {
-    @apply font-body text-xs tracking-editorial uppercase text-terracotta block;
+    @apply font-body text-xs tracking-editorial uppercase text-terracotta-dark block;
   }
 
   .page-title {

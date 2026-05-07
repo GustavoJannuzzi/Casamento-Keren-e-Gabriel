@@ -13,6 +13,8 @@ export async function POST(req: NextRequest) {
     const data = schema.parse(body)
 
     const supabase = getSupabaseServiceClient()
+    if (!supabase) return NextResponse.json({ error: 'Supabase não configurado' }, { status: 503 })
+
     const { error } = await supabase.from('recados').insert({
       nome: data.nome,
       mensagem: data.mensagem,

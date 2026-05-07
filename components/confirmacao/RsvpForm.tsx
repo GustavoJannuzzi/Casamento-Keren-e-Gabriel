@@ -71,7 +71,7 @@ export default function RsvpForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 max-w-xl mx-auto">
       {/* Attendance toggle */}
       <div>
-        <p className="font-body text-[10px] tracking-editorial uppercase text-warm-gray mb-3">
+        <p className="font-body text-[11px] sm:text-[10px] tracking-editorial uppercase text-warm-gray mb-3">
           Você irá comparecer?
         </p>
         <div className="flex gap-3">
@@ -96,7 +96,7 @@ export default function RsvpForm() {
 
       {/* Nome */}
       <div>
-        <label className="font-body text-[10px] tracking-editorial uppercase text-warm-gray block mb-2">
+        <label className="font-body text-[11px] sm:text-[10px] tracking-editorial uppercase text-warm-gray block mb-2">
           Nome completo *
         </label>
         <input
@@ -109,7 +109,7 @@ export default function RsvpForm() {
 
       {/* Email */}
       <div>
-        <label className="font-body text-[10px] tracking-editorial uppercase text-warm-gray block mb-2">
+        <label className="font-body text-[11px] sm:text-[10px] tracking-editorial uppercase text-warm-gray block mb-2">
           Email
         </label>
         <input
@@ -123,7 +123,7 @@ export default function RsvpForm() {
 
       {/* Telefone */}
       <div>
-        <label className="font-body text-[10px] tracking-editorial uppercase text-warm-gray block mb-2">
+        <label className="font-body text-[11px] sm:text-[10px] tracking-editorial uppercase text-warm-gray block mb-2">
           Telefone / WhatsApp
         </label>
         <input
@@ -136,7 +136,7 @@ export default function RsvpForm() {
       {/* Acompanhantes */}
       {confirmado && (
         <div>
-          <label className="font-body text-[10px] tracking-editorial uppercase text-warm-gray block mb-3">
+          <label className="font-body text-[11px] sm:text-[10px] tracking-editorial uppercase text-warm-gray block mb-3">
             Acompanhantes (além de você)
           </label>
           <div className="flex gap-2 flex-wrap">
@@ -160,7 +160,7 @@ export default function RsvpForm() {
 
       {/* Restrição alimentar */}
       <div>
-        <label className="font-body text-[10px] tracking-editorial uppercase text-warm-gray block mb-2">
+        <label className="font-body text-[11px] sm:text-[10px] tracking-editorial uppercase text-warm-gray block mb-2">
           Restrição alimentar (opcional)
         </label>
         <input
@@ -172,7 +172,7 @@ export default function RsvpForm() {
 
       {/* Mensagem */}
       <div>
-        <label className="font-body text-[10px] tracking-editorial uppercase text-warm-gray block mb-2">
+        <label className="font-body text-[11px] sm:text-[10px] tracking-editorial uppercase text-warm-gray block mb-2">
           Mensagem para os noivos (opcional)
         </label>
         <textarea

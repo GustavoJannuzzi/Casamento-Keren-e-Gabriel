@@ -2,27 +2,29 @@
 
 import Image from 'next/image'
 import { useRef } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion'
 
 export default function PhotoSection() {
   const ref = useRef<HTMLDivElement>(null)
+  const reduced = useReducedMotion()
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start end', 'end start'],
   })
 
-  const y = useTransform(scrollYProgress, [0, 1], ['-12%', '12%'])
+  const y = useTransform(scrollYProgress, [0, 1], reduced ? ['0%', '0%'] : ['-12%', '12%'])
   const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0])
-  const textY = useTransform(scrollYProgress, [0.2, 0.8], ['20px', '-20px'])
+  const textY = useTransform(scrollYProgress, [0.2, 0.8], reduced ? ['0px', '0px'] : ['20px', '-20px'])
 
   return (
     <section ref={ref} className="relative h-[70vh] md:h-[80vh] overflow-hidden">
       {/* Foto com parallax */}
-      <motion.div style={{ y }} className="absolute inset-0 scale-125">
+      <motion.div style={{ y }} className={reduced ? 'absolute inset-0' : 'absolute inset-0 scale-125'}>
         <Image
           src="/images/noivos.jpeg"
           alt="Keren e Gabriel"
           fill
+          sizes="100vw"
           className="object-cover object-center"
         />
         {/* overlay escuro para legibilidade */}

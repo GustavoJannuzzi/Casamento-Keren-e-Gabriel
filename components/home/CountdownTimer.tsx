@@ -21,11 +21,11 @@ export default function CountdownTimer() {
   ]
 
   return (
-    <div className="flex items-end gap-5">
+    <div className="flex items-end gap-3 sm:gap-5">
       {units.map(({ value, label }, i) => (
-        <div key={label} className="flex items-end gap-5">
+        <div key={label} className="flex items-end gap-3 sm:gap-5">
           <div className="text-center">
-            <span className="font-heading text-4xl md:text-5xl font-light text-ink tabular-nums block leading-none">
+            <span className="font-heading font-light text-ink tabular-nums block leading-none" style={{ fontSize: 'clamp(1.75rem, 7vw, 3rem)' }}>
               {String(value).padStart(2, '0')}
             </span>
             <span className="font-body text-[10px] tracking-editorial uppercase text-warm-gray block mt-1.5">
@@ -33,7 +33,7 @@ export default function CountdownTimer() {
             </span>
           </div>
           {i < units.length - 1 && (
-            <span className="font-heading text-2xl text-warm-line font-light mb-6 select-none">·</span>
+            <span className="font-heading text-xl sm:text-2xl text-warm-line font-light mb-5 sm:mb-6 select-none">·</span>
           )}
         </div>
       ))}

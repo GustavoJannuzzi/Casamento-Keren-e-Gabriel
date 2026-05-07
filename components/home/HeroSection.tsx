@@ -43,6 +43,7 @@ export default function HeroSection() {
             src="/images/noivos-principal.jpeg"
             alt="Keren e Gabriel"
             fill
+            sizes="(max-width: 1024px) 100vw, 50vw"
             className="object-cover object-top"
             priority
           />

@@ -58,10 +58,31 @@ export interface RecadoFormData {
   mensagem: string
 }
 
+export interface Contribuicao {
+  id: string
+  presente_id: string
+  contribuidor_nome: string
+  contribuidor_email: string | null
+  valor: number
+  mensagem: string | null
+  status: 'pendente' | 'aprovado' | 'cancelado'
+  mp_preference_id: string | null
+  mp_payment_id: string | null
+  created_at: string
+}
+
+export interface PresenteComProgresso extends Presente {
+  valor_arrecadado: number
+  percentual: number
+  contribuicoes: Contribuicao[]
+}
+
 export interface CriarPreferenciaPayload {
   presenteId: string
   nome: string
   email: string
+  valor?: number
+  mensagem?: string
 }
 
 export interface ReservarPayload {

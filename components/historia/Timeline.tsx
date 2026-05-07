@@ -25,6 +25,7 @@ function ProposalPhoto() {
           src="/images/pedido de casamento.jpeg"
           alt="O pedido de casamento em Buenos Aires"
           fill
+          sizes="(max-width: 768px) 100vw, 50vw"
           className="object-cover object-center"
         />
         {/* overlay leve para não competir com o card */}
@@ -41,7 +42,7 @@ function TimelineItem({ event, index }: { event: typeof events[0]; index: number
   const isLeft = index % 2 === 0
 
   return (
-    <div ref={ref} className={`relative grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-12 items-start ${!isLeft ? 'md:[direction:rtl]' : ''}`}>
+    <div ref={ref} className={`relative grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-12 items-start mb-12 md:mb-0 ${!isLeft ? 'md:[direction:rtl]' : ''}`}>
 
       {/* Card */}
       <motion.div

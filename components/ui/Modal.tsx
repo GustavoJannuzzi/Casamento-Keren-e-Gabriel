@@ -54,7 +54,7 @@ export default function Modal({ isOpen, onClose, title, children, className, siz
             exit={{ opacity: 0, y: 24 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className={cn(
-              'relative w-full bg-white border border-warm-line z-10',
+              'relative w-full bg-white border border-warm-line z-10 max-h-[90vh] overflow-y-auto',
               sizes[size],
               className
             )}

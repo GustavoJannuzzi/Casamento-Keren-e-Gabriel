@@ -1,59 +1,56 @@
 'use client'
 
 import { useState } from 'react'
-import Badge from '@/components/ui/Badge'
-import Button from '@/components/ui/Button'
-import ReservarModal from './ReservarModal'
-import PixModal from './PixModal'
 import { formatCurrency } from '@/lib/utils'
-import type { Presente } from '@/types'
+import GiftDetailModal from './GiftDetailModal'
+import PixModal from './PixModal'
+import type { PresenteComProgresso } from '@/types'
 
 interface GiftCardProps {
-  presente: Presente
-  onReserved: (id: string, nome: string, mensagem: string) => void
+  presente: PresenteComProgresso
 }
 
-export default function GiftCard({ presente, onReserved }: GiftCardProps) {
-  const [showReservar, setShowReservar] = useState(false)
+export default function GiftCard({ presente }: GiftCardProps) {
+  const [showDetail, setShowDetail] = useState(false)
   const [showPix, setShowPix] = useState(false)
-  const [loadingMP, setLoadingMP] = useState(false)
 
-  const isEspecial  = presente.categoria === 'especial'
-  const isDisponivel = presente.status === 'disponivel'
+  const isEspecial = presente.categoria === 'especial'
+  const isCompleto = presente.status === 'comprado' || (presente.preco && presente.valor_arrecadado >= Number(presente.preco))
+  const restante = presente.preco ? Math.max(0, Number(presente.preco) - presente.valor_arrecadado) : 0
 
-  async function handlePresentear() {
-    if (isEspecial) { setShowPix(true); return }
-    setLoadingMP(true)
-    try {
-      const res = await fetch('/api/mp/criar-preferencia', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ presenteId: presente.id, nome: 'Convidado', email: 'convidado@casamento.com' }),
-      })
-      const data = await res.json()
-      if (data.init_point) {
-        window.open(data.init_point, '_blank')
-        setTimeout(() => setShowReservar(true), 1500)
-      }
-    } catch {}
-    finally { setLoadingMP(false) }
+  function handleClick() {
+    if (isEspecial && !presente.preco) { setShowPix(true); return }
+    setShowDetail(true)
   }
 
   return (
     <>
-      <div className="group flex flex-col h-full border border-warm-line hover:border-warm-gray transition-colors duration-300 bg-white">
-        {/* Ícone / imagem */}
+      <button
+        onClick={handleClick}
+        disabled={isCompleto || false}
+        className="group flex flex-col h-full text-left border border-warm-line hover:border-warm-gray transition-colors duration-300 bg-white disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        {/* Imagem */}
         <div className="h-40 bg-cream-dark flex items-center justify-center border-b border-warm-line relative">
           <span className="text-5xl opacity-30 select-none">{isEspecial ? '✈' : '○'}</span>
-          <div className="absolute top-3 right-3">
-            <Badge status={presente.status} />
-          </div>
+
+          {/* Status pill */}
+          {isCompleto && (
+            <div className="absolute top-3 right-3 font-body text-[9px] tracking-editorial uppercase bg-ink text-cream px-2.5 py-1">
+              Completo
+            </div>
+          )}
+          {!isCompleto && presente.percentual > 0 && (
+            <div className="absolute top-3 right-3 font-body text-[9px] tracking-editorial uppercase border border-terracotta text-terracotta-dark bg-white px-2.5 py-1 tabular-nums">
+              {presente.percentual}% arrecadado
+            </div>
+          )}
         </div>
 
         {/* Conteúdo */}
         <div className="flex flex-col flex-1 p-6">
           {presente.categoria && (
-            <p className="font-body text-[10px] tracking-editorial uppercase text-terracotta mb-2">
+            <p className="font-body text-[10px] tracking-editorial uppercase text-terracotta-dark mb-2">
               {presente.categoria.replace('-', ' ')}
             </p>
           )}
@@ -67,38 +64,50 @@ export default function GiftCard({ presente, onReserved }: GiftCardProps) {
           )}
 
           <div className="mt-auto pt-4 border-t border-warm-line/60">
-            <p className="font-heading text-2xl text-ink font-light mb-4">
-              {formatCurrency(presente.preco)}
-            </p>
+            {presente.preco ? (
+              <>
+                <div className="flex items-baseline justify-between mb-3">
+                  <p className="font-heading text-2xl text-ink font-light">
+                    {formatCurrency(presente.preco)}
+                  </p>
+                  {presente.valor_arrecadado > 0 && (
+                    <p className="font-body text-[10px] tracking-editorial uppercase text-warm-gray">
+                      {formatCurrency(presente.valor_arrecadado)} arrec.
+                    </p>
+                  )}
+                </div>
 
-            {isDisponivel ? (
-              <Button onClick={handlePresentear} loading={loadingMP} className="w-full" size="sm">
-                {isEspecial ? 'Contribuir' : 'Presentear'}
-              </Button>
+                {/* Progress bar */}
+                <div className="relative h-1 bg-warm-line mb-3 overflow-hidden">
+                  <div
+                    className="absolute top-0 left-0 h-full bg-terracotta transition-all duration-700"
+                    style={{ width: `${presente.percentual}%` }}
+                  />
+                </div>
+
+                {!isCompleto ? (
+                  <p className="font-body text-[11px] text-warm-gray italic">
+                    Restam {formatCurrency(restante)} · contribua com o valor que quiser
+                  </p>
+                ) : (
+                  <p className="font-body text-[11px] text-terracotta-dark">
+                    Obrigados a todos que contribuíram!
+                  </p>
+                )}
+              </>
             ) : (
-              <div className="space-y-1">
-                {presente.comprador_nome && (
-                  <p className="font-body text-xs text-warm-gray">
-                    Presenteado por <span className="text-ink font-medium">{presente.comprador_nome}</span>
-                  </p>
-                )}
-                {presente.comprador_mensagem && (
-                  <p className="font-body text-xs text-warm-muted italic">
-                    &ldquo;{presente.comprador_mensagem}&rdquo;
-                  </p>
-                )}
-              </div>
+              <p className="font-heading text-2xl text-ink font-light">
+                Valor livre
+              </p>
             )}
           </div>
         </div>
-      </div>
+      </button>
 
-      <ReservarModal
-        isOpen={showReservar}
-        onClose={() => setShowReservar(false)}
-        presenteId={presente.id}
-        presenteNome={presente.nome}
-        onSuccess={(nome, mensagem) => { setShowReservar(false); onReserved(presente.id, nome, mensagem) }}
+      <GiftDetailModal
+        isOpen={showDetail}
+        onClose={() => setShowDetail(false)}
+        presente={presente}
       />
       <PixModal isOpen={showPix} onClose={() => setShowPix(false)} />
     </>
